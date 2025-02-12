@@ -23,7 +23,8 @@ pub enum ResponseErrorMessage {
     AlreadyExists,
     DataNotModified,
     RequestNotAcceptable,
-    DataNotDelete
+    DataNotDelete,
+    DataNotFound
 }
 
 #[derive(Debug)]
