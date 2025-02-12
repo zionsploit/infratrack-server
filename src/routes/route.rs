@@ -6,7 +6,7 @@ use http::StatusCode;
 
 use crate::{enums::response_enum::{ResponseErrorMessage, VerifiedToken}, utils::token::verified_token};
 
-use super::{account_route::account_routes, project_interface_route::project_interface_route};
+use super::{account_route::account_routes, project_interface_route::project_interface_route, project_takers_route::project_takers_route};
 
 // Routes middleware for Token Verification
 async fn verified_token_middleware (req: Request, next: Next) -> Result<Response, impl IntoResponse> {
@@ -26,11 +26,14 @@ async fn verified_token_middleware (req: Request, next: Next) -> Result<Response
 
 // API Routes
 pub fn api_routes () -> Router {
-    
+    let route_middleware = middleware::from_fn(verified_token_middleware);
+
     Router::new()
         .nest("/account", account_routes() )
-        .nest("/project-interface", 
-            project_interface_route()
-            .route_layer(middleware::from_fn(verified_token_middleware))
+        .nest("/project-interface", project_interface_route()
+            .route_layer(route_middleware.clone())
+        )
+        .nest("/project-takers", project_takers_route()
+            .route_layer(route_middleware.clone())
         )
 }
