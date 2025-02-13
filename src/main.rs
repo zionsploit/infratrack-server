@@ -3,6 +3,7 @@ mod structs;
 mod services;
 mod enums;
 mod utils;
+mod test;
 
 use std::{net::SocketAddr, sync::Arc};
 use axum::{http::Method, Extension, Router};
