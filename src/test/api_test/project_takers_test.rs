@@ -29,6 +29,4 @@ async fn get_all_project_takers () {
 
     // TEST FOR RESPONSE STATUS
     response.assert_status_ok();
-
-    // TEST FOR RESPONSE BODY
 }
