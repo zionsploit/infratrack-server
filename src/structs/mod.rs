@@ -1,8 +1,8 @@
 pub mod pool_conn_struct;
 pub mod account_struct;
 pub mod project_interface;
-
 pub mod project_takers;
+pub mod contractors_struct;
 
 pub mod basic_struct {
     use serde::Deserialize;
