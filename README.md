@@ -17,3 +17,17 @@ This project is inspired and based by the following company:
 
 **Server:** Rust, Axum
 
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
+
+Database mysql host.  
+`DATABASE_URL= ?`.   
+
+known as your secret key for encypt and jwt generate.  
+`PASSWORD_MAGICKEY= ?`.   
+
+this api key is used in apianalytics. just visit this link  [apiAnalytics](https://www.apianalytics.dev/) and read the documentation.   
+`API_KEY= ?`
+
