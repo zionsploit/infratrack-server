@@ -1,0 +1,7 @@
+-- Add migration script here
+CREATE TABLE IF NOT EXISTS project_status (
+    id Int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    status ENUM ('NOT YET STARTED', 'PREPERATION', 'BIDDING', 'BIDDED', 'ON GOING', 'COMPLETED', 'SUSPENDED'),
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
