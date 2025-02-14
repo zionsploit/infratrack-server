@@ -41,5 +41,5 @@ To generate types from structs.
 
 To run the program
 ```bash
-cargo run
+  cargo run
 ```
