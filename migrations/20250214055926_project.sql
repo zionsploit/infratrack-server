@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS projects (
     project_funded VARCHAR(255) NOT NULL,
     project_year YEAR DEFAULT NOW(),
     project_code VARCHAR(255) NOT NULL,
+    
     project_status_id Int,
     INDEX project_status_id_ind (project_status_id),
     FOREIGN KEY (project_status_id) REFERENCES project_status(id) ON DELETE CASCADE,
