@@ -115,3 +115,14 @@ async fn delete_project_by_id () {
 
     respose.assert_status_ok();
 }
+
+#[tokio::test]
+async fn get_all_projects () {
+    let app = project_route().layer(Extension(initialized_db_connection().await));
+
+    let server = TestServer::new(app).unwrap();
+
+    let respose = server.get("/get-all").await;
+
+    respose.assert_status_ok();
+}
