@@ -1,4 +1,3 @@
-use std::sync::Arc;
 
 use axum::Extension;
 use axum_test::TestServer;
