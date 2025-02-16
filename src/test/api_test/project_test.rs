@@ -4,19 +4,8 @@ use axum::Extension;
 use axum_test::TestServer;
 use chrono::DateTime;
 use serde_json::json;
-use sqlx::mysql::MySqlPoolOptions;
 
-use crate::{routes::project_route::project_route, structs::{pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, UpdateProjectById}}};
-
-async fn initialized_db_connection () -> Arc<PoolConnectionState> {
-    let database_url = dotenvy::var("DATABASE_URL").unwrap() ;
-    let mysql_pool = MySqlPoolOptions::new().connect(&database_url).await.unwrap();
-    let conn_state = Arc::new(PoolConnectionState {
-        connection: mysql_pool
-    });
-
-    conn_state
-}
+use crate::{routes::project_route::project_route, structs::project_struct::{Project, ProjectDetails, UpdateProjectById}, utils::db_connection::initialized_db_connection};
 
 #[tokio::test]
 async fn add_project_details () {

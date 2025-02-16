@@ -1,22 +1,10 @@
-use std::sync::Arc;
 
 use axum::Extension;
 use axum_test::TestServer;
 use http::StatusCode;
 use serde_json::json;
-use sqlx::mysql::MySqlPoolOptions;
 
-use crate::{routes::contractors_route::contractors_route, structs::{contractors_struct::{Contractors, UpdateContractorsById}, pool_conn_struct::PoolConnectionState}};
-
-async fn initialized_db_connection () -> Arc<PoolConnectionState> {
-    let database_url = dotenvy::var("DATABASE_URL").unwrap() ;
-    let mysql_pool = MySqlPoolOptions::new().connect(&database_url).await.unwrap();
-    let conn_state = Arc::new(PoolConnectionState {
-        connection: mysql_pool
-    });
-
-    conn_state
-}
+use crate::{routes::contractors_route::contractors_route, structs::contractors_struct::{Contractors, UpdateContractorsById}, utils::db_connection::initialized_db_connection};
 
 #[tokio::test]
 async fn add_contractors () {
