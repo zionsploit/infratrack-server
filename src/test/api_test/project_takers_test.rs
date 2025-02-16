@@ -27,6 +27,5 @@ async fn get_all_project_takers () {
 
     let response = server.get("/get-all").await;
 
-    // TEST FOR RESPONSE STATUS
     response.assert_status_ok();
 }
