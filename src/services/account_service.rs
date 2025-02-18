@@ -4,11 +4,11 @@ use hmac::{Hmac, Mac};
 use jwt::{AlgorithmType, Header, SignWithKey, Token };
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use sha2::Sha384;
+use uuid::Uuid;
 use crate::{
     enums::response_enum::{ResponseErrorMessage, ResponseOkMessage, VerifiedToken}, 
     structs::{
-        account_struct::{AccountLogin, AccountRegistration, ReturnAccountInformation, TokenVerification}, 
-        pool_conn_struct::PoolConnectionState
+        account_credentials_struct::{RequestAccountCredentials, ResponseAccountCredentials}, account_struct::{AccountLogin, AccountRegistration, ReturnAccountInformation, TokenVerification}, pool_conn_struct::PoolConnectionState
     }, utils::token::verified_token};
 
 // POST METHOD
@@ -106,4 +106,47 @@ pub async fn verify_token (
         VerifiedToken::TokenIsNotValid => (StatusCode::FORBIDDEN, format!("{:?}", ResponseErrorMessage::TokenIsNotValid))
     }
 
+}
+
+
+// NEW API IMPLEMENTATIONS
+pub async fn add_account_credentials (
+    Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
+    Json(request): Json<RequestAccountCredentials>
+) -> impl IntoResponse {
+
+    let check_if_username_is_exists: Result<ResponseAccountCredentials, sqlx::Error> = sqlx::query_as("SELECT * FROM account_credentials WHERE username LIKE ? OR recovery_email LIKE ?")
+        .bind(format!("%{}%", &request.username))
+        .bind(format!("%{}%", &request.recover_email))
+        .fetch_one(&sql_pool.connection).await;
+
+    if let Ok(_) = check_if_username_is_exists {
+        return (StatusCode::CONFLICT, format!("{:?}", ResponseErrorMessage::AlreadyExists));
+    };
+
+    let env_password_magic_key = dotenvy::var("PASSWORD_MAGICKEY");
+
+    if let Err(e) = env_password_magic_key {
+        return (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}: {}", ResponseErrorMessage::ReadingPasswordKeyNotFound, e));
+    }
+
+    let encypt_aes_password = if request.password.clone().eq(&request.confirm_password) {
+        let mc = new_magic_crypt!(env_password_magic_key.unwrap(), 256);
+
+        let password_base64 = mc.encrypt_bytes_to_base64(&request.password);
+        password_base64
+    } else {
+        return (StatusCode::BAD_REQUEST, format!("{:?}", ResponseErrorMessage::PasswordIsNotSame));
+    };
+
+    let id: Uuid = Uuid::new_v4();
+
+    match sqlx::query("INSERT INTO account_credentials (id, username, recovery_email, password) VALUES (?, ?, ?, ?)")
+        .bind(id.to_string())
+        .bind(request.username)
+        .bind(request.recover_email)
+        .bind(encypt_aes_password).execute(&sql_pool.connection.to_owned()).await {
+            Ok(_) => (StatusCode::OK, format!("{:?}", ResponseOkMessage::NewDataCreated)),
+            Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", ResponseErrorMessage::ExecutingQueryError))
+        }
 }
