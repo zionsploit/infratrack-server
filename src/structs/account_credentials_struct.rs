@@ -1,9 +1,10 @@
 use chrono::{DateTime, Utc};
 use ::serde::{Deserialize, Serialize};
+use sqlx::{Decode, FromRow};
 use ts_rs::TS;
 
 
-#[derive(Deserialize, Serialize, Debug, TS)]
+#[derive(FromRow, Decode, Deserialize, Serialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Account.ts")]
 pub struct AccountCredentialsBase {
     pub username: String,
@@ -11,7 +12,16 @@ pub struct AccountCredentialsBase {
     pub password: String,
 }
 
-#[derive(Deserialize, Serialize, Debug, TS)]
+#[derive(FromRow, Decode, Deserialize, Serialize, Debug, TS)]
+#[ts(export, export_to = "../../src/ServerTypes/Account.ts")]
+pub struct RequestAccountCredentials {
+    pub username: String,
+    pub recover_email: String,
+    pub password: String,
+    pub confirm_password: String
+}
+
+#[derive(FromRow, Deserialize, Serialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Account.ts")]
 pub struct UpdateAccountCredentials {
     pub id: String,
@@ -20,14 +30,13 @@ pub struct UpdateAccountCredentials {
     pub account_base: AccountCredentialsBase
 }
 
-#[derive(Deserialize, Serialize, Debug, TS)]
+#[derive(FromRow, Deserialize, Serialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Account.ts")]
-pub struct ReturnAccountCredentials {
+pub struct ResponseAccountCredentials {
     pub id: String,
-
-    #[serde(flatten)]
-    pub account_base: AccountCredentialsBase,
-
+    pub username: String,
+    pub recovery_email: String,
+    pub password: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>
 }
