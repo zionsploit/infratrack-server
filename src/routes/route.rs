@@ -1,10 +1,11 @@
 
 
-use axum::{extract::Request, middleware::{self, Next}, response::{IntoResponse, Response}, Router};
+
+use axum::{extract::Request, middleware::{self, Next}, response::{IntoResponse, Response}, routing::post, Router};
 use http::StatusCode;
 
 
-use crate::{enums::response_enum::{ResponseErrorMessage, VerifiedToken}, utils::token::verified_token};
+use crate::{enums::response_enum::{ResponseErrorMessage, VerifiedToken}, services::storage_service::storage, utils::token::verified_token};
 
 use super::{account_route::account_routes, contractors_route::contractors_route, project_interface_route::project_interface_route, project_route::project_route, project_takers_route::project_takers_route};
 
@@ -40,4 +41,5 @@ pub fn api_routes () -> Router {
             .route_layer(route_middleware.clone()))
         .nest("/project", project_route()
             .route_layer(route_middleware.clone()))
+        .route("/upload-assets", post(storage ))
 }
