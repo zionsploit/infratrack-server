@@ -24,7 +24,8 @@ pub enum ResponseErrorMessage {
     DataNotModified,
     RequestNotAcceptable,
     DataNotDelete,
-    DataNotFound
+    DataNotFound,
+    InvalidRequest
 }
 
 #[derive(Debug)]
