@@ -1,5 +1,7 @@
 use std::{fs::{DirBuilder, File}, ops::Add, io::Write, path::Path};
 
+use infer::MatcherType;
+use sha2::{Sha256, Digest};
 
 #[allow(unused)]
 pub struct Storage;
@@ -41,5 +43,34 @@ impl Storage {
         file.write_all(file_bytes);
 
         Some("Done".to_string())
+    }
+
+    // VERIFY FILE MIME TYPE
+    pub fn verify_file_mime_type (file_bytes: &[u8]) -> Option<MatcherType> {
+        let file_mime = infer::get(file_bytes);
+
+        if let None = file_mime {
+            return None;
+        }
+
+        return Some(file_mime.unwrap().matcher_type());
+    }
+
+    // HASH FILE
+    pub fn hash_file (file_bytes: &[u8]) -> String {
+        let mut hasher = Sha256::new();
+
+        hasher.update(file_bytes);
+
+        let result = hasher.finalize();
+
+        hex::encode(result).to_owned()
+    }
+
+    // FILE TYPE
+    pub fn get_file_ext (file_bytes: &[u8]) -> String {
+        let file = infer::get(file_bytes).unwrap();
+
+        file.extension().to_owned()
     }
 }
