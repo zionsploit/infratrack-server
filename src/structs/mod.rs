@@ -5,6 +5,7 @@ pub mod project_takers;
 pub mod contractors_struct;
 pub mod project_struct;
 pub mod account_credentials_struct;
+pub mod account_assets;
 pub mod basic_struct {
     use serde::Deserialize;
     use ts_rs::TS;
