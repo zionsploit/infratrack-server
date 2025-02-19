@@ -26,7 +26,7 @@ pub async fn storage (
 
         let verify_file = Storage::verify_file_mime_type(&get_file_bytes);
 
-        if let Some(ref mime_type) = verify_file {
+        if let Some(mime_type) = verify_file {
             if mime_type.ne(&MatcherType::Image) {
                 return (StatusCode::BAD_REQUEST, format!("{:?}", ResponseErrorMessage::InvalidRequest));
             }
