@@ -6,6 +6,7 @@ mod utils;
 mod test;
 
 use std::net::SocketAddr;
+use std::str::FromStr;
 use axum::{http::Method, Extension, Router};
 use axum_analytics::Analytics;
 use routes::route::api_routes;
@@ -20,6 +21,8 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let analytics_api_key = dotenvy::var("API_KEY");
+
+    let host_server = dotenvy::var("HOST_SERVER").expect("Missing Host Server ENV");
 
     if let Ok(_) = analytics_api_key {
         info!("Initialized Api Analytics");
@@ -37,7 +40,7 @@ async fn main() {
         .layer(cors);
 
 
-    let addr = SocketAddr::from(([0,0,0,0], 3000));
+    let addr = SocketAddr::from_str(&host_server).unwrap();
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     info!("Server listening on {}", listener.local_addr().unwrap());
 
