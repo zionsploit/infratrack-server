@@ -52,6 +52,7 @@ pub async fn register_account (
     }
 }
 
+// Breaking Changes Work in progress will now based on account_credentials
 pub async fn login_account (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
     Json(request): Json<AccountLogin>
@@ -97,6 +98,8 @@ pub async fn login_account (
         }
 }
 
+
+// TO BE CHECK AFTER THE login_account fn will done for changes
 pub async fn verify_token (
     Json(request): Json<TokenVerification>
 ) -> impl IntoResponse {
