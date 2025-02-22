@@ -77,11 +77,15 @@ pub async fn serve_image (
 
     let file_path = format!("Storage/images/{}", image_name);
 
-    let mut file = File::open(file_path).unwrap();
+    let file = File::open(file_path);
+
+    if let Err(_) = file {
+        return (StatusCode::NOT_FOUND).into_response();
+    }
 
     let mut buffer = Vec::new();
 
-    file.read_to_end(&mut buffer).unwrap();
+    file.unwrap().read_to_end(&mut buffer).unwrap();
 
     let infer = Infer::new();
 
