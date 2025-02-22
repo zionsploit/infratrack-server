@@ -51,7 +51,9 @@ pub async fn storage (
                         let result = result.last_insert_id();
 
                         Storage::create_storage_if_not_exists();
-                        Storage::create_file("images", &file_information.file_name, &get_file_bytes);
+                        let foldername = "images";
+                        Storage::create_folder(&foldername);
+                        Storage::create_file(foldername, &file_information.file_name, &get_file_bytes);
 
                         return (StatusCode::OK, format!("{}", result));
                     },
