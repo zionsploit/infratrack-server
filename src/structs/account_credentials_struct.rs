@@ -22,3 +22,11 @@ pub struct ResponseAccountCredentials {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>
 }
+
+#[derive(Debug, Serialize)]
+pub struct JwtStructure {
+    pub id: String,
+    pub username: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>
+}
