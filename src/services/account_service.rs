@@ -65,8 +65,6 @@ pub async fn login_account (
         }
 }
 
-
-// TO BE CHECK AFTER THE login_account fn will done for changes
 pub async fn verify_token (
     Json(request): Json<TokenVerification>
 ) -> impl IntoResponse {
@@ -78,8 +76,6 @@ pub async fn verify_token (
 
 }
 
-
-// NEW API IMPLEMENTATIONS
 pub async fn add_account_credentials (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
     Json(request): Json<RequestAccountCredentials>
