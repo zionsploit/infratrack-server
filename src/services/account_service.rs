@@ -5,54 +5,13 @@ use jwt::{AlgorithmType, Header, SignWithKey, Token };
 use magic_crypt::{new_magic_crypt, MagicCryptTrait};
 use sha2::Sha384;
 use uuid::Uuid;
+use tracing::error;
 use crate::{
     enums::response_enum::{ResponseErrorMessage, ResponseOkMessage, VerifiedToken}, 
     structs::{
-        account_credentials_struct::{RequestAccountCredentials, ResponseAccountCredentials}, account_struct::{AccountLogin, AccountRegistration, ReturnAccountInformation, TokenVerification}, pool_conn_struct::PoolConnectionState
+        account_credentials_struct::{JwtStructure, RequestAccountCredentials, ResponseAccountCredentials}, account_struct::{AccountLogin, TokenVerification}, pool_conn_struct::PoolConnectionState
     }, utils::token::verified_token};
 
-// POST METHOD
-pub async fn register_account (
-    Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
-    Json(request): Json<AccountRegistration>,
-) -> impl IntoResponse {
-
-    let env_password_magic_key = dotenvy::var("PASSWORD_MAGICKEY");
-
-    if let Err(e) = env_password_magic_key {
-        return (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}: {}", ResponseErrorMessage::ReadingPasswordKeyNotFound, e));
-    }
-
-    let encypt_aes_password = if request.password.clone().eq(&request.confirmpassword) {
-        let mc = new_magic_crypt!(env_password_magic_key.unwrap(), 256);
-
-        let password_base64 = mc.encrypt_bytes_to_base64(&request.password);
-        password_base64
-    } else {
-        return (StatusCode::BAD_REQUEST, format!("{:?}: password and confirm password doesn't match", ResponseErrorMessage::PasswordIsNotSame));
-    };
-    
-
-    let find_account_by_username: Result<ReturnAccountInformation, sqlx::Error> = sqlx::query_as("SELECT * from account WHERE user_name = ?").bind(&request.username).fetch_one(&sql_pool.connection).await;
-
-    if let Ok(_) = find_account_by_username {
-        return (StatusCode::BAD_REQUEST, format!("{:?}", ResponseErrorMessage::UsernameIsExists));
-    }
-
-    match 
-        sqlx::query("INSERT INTO account (first_name, middle_name, last_name, user_name, password) VALUES (?, ?, ?, ?, ?)")
-            .bind(request.firstname)
-            .bind(request.middlename)
-            .bind(request.lastname)
-            .bind(request.username)
-            .bind(encypt_aes_password)
-            .execute(&sql_pool.connection).await {
-        Ok(_) => (StatusCode::OK, format!("{:?}", ResponseOkMessage::NewAccountCreated)),
-        Err(error) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?} {}", ResponseErrorMessage::ExecutingQueryError, error))
-    }
-}
-
-// Breaking Changes Work in progress will now based on account_credentials
 pub async fn login_account (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
     Json(request): Json<AccountLogin>
@@ -68,12 +27,12 @@ pub async fn login_account (
         mc.encrypt_bytes_to_base64(&request.password)
     };
 
-    match sqlx::query_as("SELECT * FROM account where user_name = ? AND password = ?")
+    match sqlx::query_as("SELECT * FROM account_credentials where username = ? AND password = ?")
         .bind(request.username)
         .bind(encyrpt_aes_password)
         .fetch_one(&sql_pool.connection).await {
             Ok(result) => {
-                let account_information: ReturnAccountInformation = result;
+                let account_information: ResponseAccountCredentials = result;
 
                 let jwt_key: Hmac<Sha384> = Hmac::new_from_slice(env_password_magic_key.unwrap().as_bytes()).unwrap();
                 
@@ -82,9 +41,14 @@ pub async fn login_account (
                     ..Default::default()
                 };
 
-                let mut claims: BTreeMap<String, ReturnAccountInformation> = BTreeMap::new();
+                let mut claims: BTreeMap<String, JwtStructure> = BTreeMap::new();
 
-                claims.insert("sub".to_owned(), account_information);
+                claims.insert("sub".to_owned(), JwtStructure {
+                    id: account_information.id.to_string(),
+                    username: account_information.username,
+                    created_at: account_information.created_at,
+                    updated_at: account_information.updated_at
+                });
 
                 let token = Token::new(header, claims).sign_with_key(&jwt_key);
 
@@ -92,9 +56,12 @@ pub async fn login_account (
                     return (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}: {}", ResponseErrorMessage::ErrorGeneratingToken, e));
                 }
 
-                (StatusCode::OK, format!("{:?}", token.unwrap().as_str()))
+                (StatusCode::OK, token.unwrap().as_str().to_string())
             }
-            Err(_) => (StatusCode::BAD_REQUEST, format!("{:?}", ResponseErrorMessage::AccountNotFound))
+            Err(err) => {
+                error!("{}", err);
+                (StatusCode::BAD_REQUEST, format!("{:?}", ResponseErrorMessage::AccountNotFound))
+            }
         }
 }
 
@@ -119,8 +86,8 @@ pub async fn add_account_credentials (
 ) -> impl IntoResponse {
 
     let check_if_username_is_exists: Result<ResponseAccountCredentials, sqlx::Error> = sqlx::query_as("SELECT * FROM account_credentials WHERE username LIKE ? OR recovery_email LIKE ?")
-        .bind(format!("%{}%", &request.username))
-        .bind(format!("%{}%", &request.recover_email))
+        .bind(format!("{}", &request.username))
+        .bind(format!("{}", &request.recover_email))
         .fetch_one(&sql_pool.connection).await;
 
     if let Ok(_) = check_if_username_is_exists {
