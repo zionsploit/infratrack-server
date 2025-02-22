@@ -1,10 +1,10 @@
 
 
-use std::sync::Arc;
+use std::{fs::File, io::Read, sync::Arc};
 
-use axum::{extract::Multipart, response::IntoResponse, Extension};
-use http::StatusCode;
-use infer::MatcherType;
+use axum::{extract::{Multipart, Path}, response::IntoResponse, Extension};
+use http::{header, StatusCode};
+use infer::{Infer, MatcherType};
 use uuid::Uuid;
 
 use crate::{enums::response_enum::ResponseErrorMessage, structs::{account_assets::AccountAssets, pool_conn_struct::PoolConnectionState}, utils::storages::Storage};
@@ -69,4 +69,25 @@ pub async fn storage (
         return (StatusCode::NO_CONTENT, format!("{:?}", ResponseErrorMessage::DataNotFound));
     }
 
+}
+
+pub async fn serve_image (
+    Path(image_name): Path<String>
+) -> impl IntoResponse {
+
+    let file_path = format!("Storage/images/{}", image_name);
+
+    let mut file = File::open(file_path).unwrap();
+
+    let mut buffer = Vec::new();
+
+    file.read_to_end(&mut buffer).unwrap();
+
+    let infer = Infer::new();
+
+    let mime_type = match infer.get(&buffer) {
+        Some(info) => info.mime_type(),
+        None => return (StatusCode::UNSUPPORTED_MEDIA_TYPE, "Unsupported file type").into_response(),
+    };
+    ([(header::CONTENT_TYPE, mime_type.to_string())], buffer).into_response()
 }
