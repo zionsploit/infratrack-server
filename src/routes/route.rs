@@ -1,7 +1,3 @@
-
-
-
-
 use axum::{extract::Request, middleware::{self, Next}, response::{IntoResponse, Response}, routing::{get, post}, Router};
 use http::StatusCode;
 
