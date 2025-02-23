@@ -18,6 +18,12 @@ To run this project, you will need to add the following environment variables to
 Database mysql host.  
 `DATABASE_URL= ?`.   
 
+Api Server host.  
+`HOST_SERVER= ?`.   
+
+Allow Client to request.  
+`ALLOW_ORIGIN_WEB= ?`.   
+
 known as your secret key for encypt and jwt generate.  
 `PASSWORD_MAGICKEY= ?`.   
 
