@@ -9,7 +9,7 @@ use tracing::error;
 use crate::{
     enums::response_enum::{ResponseErrorMessage, ResponseOkMessage, VerifiedToken}, 
     structs::{
-        account_credentials_struct::{JwtStructure, RequestAccountCredentials, ResponseAccountCredentials}, account_struct::{AccountLogin, TokenVerification}, pool_conn_struct::PoolConnectionState
+        account_credentials_struct::{JwtStructure, RequestAccountCredentials, ResponseAccountCredentials}, account_information_struct::RequestAccountInformation, account_struct::{AccountLogin, TokenVerification}, pool_conn_struct::PoolConnectionState
     }, utils::token::verified_token};
 
 pub async fn login_account (
@@ -114,5 +114,48 @@ pub async fn add_account_credentials (
         .bind(encypt_aes_password).execute(&sql_pool.connection.to_owned()).await {
             Ok(_) => (StatusCode::OK, format!("{:?}", ResponseOkMessage::NewDataCreated)),
             Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", ResponseErrorMessage::ExecutingQueryError))
+        }
+}
+
+pub async fn add_account_information (
+    Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
+    Json(request): Json<RequestAccountInformation>
+) -> impl IntoResponse {
+
+    let find_account_cred: Result<ResponseAccountCredentials, sqlx::Error> = sqlx::query_as("SELECT * FROM account_credentials WHERE id = ?")
+        .bind(request.account_cred_id).fetch_one(&sql_pool.connection).await;
+
+    let account_cred_id = match find_account_cred {
+        Ok(result) => result.id,
+        Err(_) => {
+            return (StatusCode::NO_CONTENT, format!("{:?}", ResponseErrorMessage::AccountNotFound));
+        }
+    };
+
+    let account_id = Uuid::new_v4();
+
+    let mut account_assets_id = if request.account_assets_id.signum().eq(&0) {
+        None
+    } else {
+        Some(request.account_assets_id)
+    };
+
+    match sqlx::query("INSERT INTO account_information 
+        (id, first_name, middle_name, last_name, email_address, contact_number, position, account_cred_id, account_assets_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(String::from(account_id))
+        .bind(request.first_name)
+        .bind(request.middle_name)
+        .bind(request.last_name)
+        .bind(request.email_address)
+        .bind(request.contact_number)
+        .bind(request.position)
+        .bind(account_cred_id)
+        .bind(account_assets_id.take()).execute(&sql_pool.connection.to_owned()).await {
+            Ok(_) => (StatusCode::OK, format!("{:?}", ResponseOkMessage::NewAccountCreated)),
+            Err(err) => {
+                error!("{}", err);
+                (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", ResponseErrorMessage::ExecutingQueryError))
+            }
         }
 }
