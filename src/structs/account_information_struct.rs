@@ -1,10 +1,16 @@
+use serde::Deserialize;
+use ts_rs::TS;
+
+
+#[derive(Deserialize, Debug, TS)]
+#[ts(export, export_to = "../../src/ServerTypes/Account.ts")]
 pub struct RequestAccountInformation {
-    first_name: String,
-    middle_name: String,
-    last_name: String,
-    email_address: String,
-    contact_number: String,
-    position: String,
-    account_cred_id: String,
-    account_assets_id: String,
+    pub first_name: String,
+    pub middle_name: String,
+    pub last_name: String,
+    pub email_address: String,
+    pub contact_number: String,
+    pub position: String,
+    pub account_cred_id: String,
+    pub account_assets_id: i32,
 }
