@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use axum::{response::IntoResponse, Extension, Json};
-use chrono::{Datelike, Local};
 use http::StatusCode;
 
 use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::RequestById, pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, ReturnProject, UpdateProjectById}}};
@@ -29,8 +28,6 @@ pub async fn add_project (
     Json(request): Json<Project>
 ) -> impl IntoResponse {
 
-    let now = Local::now();
-
     let find_same_project_code: Result<ReturnProject, sqlx::Error> = sqlx::query_as("SELECT * FROM projects WHERE project_code = ?")
         .bind(&request.project_code).fetch_one(&sql_pool.connection).await;
 
@@ -39,10 +36,11 @@ pub async fn add_project (
     }
 
     match sqlx::query("INSERT INTO projects 
-        (project_funded, project_year, project_code, project_status_id, project_barangay_id, appropriation, approved_budget_contract, contract_detail_id, project_type_id, project_category_id, project_source_of_fund_id, project_mode_of_implementation_id, project_sustainable_developement_id, project_sector_id, project_taker_id, accomplished, remarks, prepared_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        (project_name, project_funded, project_year, project_code, project_status_id, project_barangay_id, appropriation, approved_budget_contract, contract_detail_id, project_type_id, project_category_id, project_source_of_fund_id, project_mode_of_implementation_id, project_sustainable_developement_id, project_sector_id, project_taker_id, accomplished, remarks, prepared_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            .bind(request.project_name)
             .bind(request.project_funded)
-            .bind(now.year())
+            .bind(request.project_year)
             .bind(request.project_code)
             .bind(request.project_status_id)
             .bind(request.project_barangay_id)
