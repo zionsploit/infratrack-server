@@ -1,6 +1,6 @@
 
 use chrono::{DateTime, Utc};
-use serde::{de, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use ts_rs::TS;
 
