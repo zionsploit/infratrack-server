@@ -1,6 +1,6 @@
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{de, Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use ts_rs::TS;
 
@@ -26,6 +26,15 @@ pub struct ReturnAccountInformation {
     pub last_name: String,
     pub user_name: String,
     pub password: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>
+}
+
+#[derive(Deserialize)]
+#[allow(unused)]
+pub struct AccountVerification {
+    pub id: String,
+    pub username: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>
 }

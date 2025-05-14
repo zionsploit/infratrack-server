@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use crate::{enums::response_enum::VerifiedToken, structs::account_struct::ReturnAccountInformation};
+use crate::{enums::response_enum::VerifiedToken, structs::account_struct::AccountVerification};
 use hmac::{Hmac, Mac};
 use jwt::{Header, Token, VerifyWithKey};
 use sha2::Sha384;
@@ -14,12 +14,17 @@ pub fn verified_token (token: &str) -> VerifiedToken {
         return VerifiedToken::TokenIsNotValid;
     }
 
+
+
     let jwt_key: Hmac<Sha384> = Hmac::new_from_slice(env_password_magic_key.unwrap().as_bytes()).unwrap();
 
-    let token_verification: Result<Token<Header, BTreeMap<String, ReturnAccountInformation>, _>, jwt::Error> = token.verify_with_key(&jwt_key);
-
+    let token_verification: Result<Token<Header, BTreeMap<String, AccountVerification>, _>, jwt::Error> = token.verify_with_key(&jwt_key);
+  
     match token_verification {
         Ok(_) => VerifiedToken::TokenIsValid,
-        Err(_) => VerifiedToken::TokenIsNotValid
+        Err(err) => {
+            println!("{:?}", err);
+            return VerifiedToken::TokenIsNotValid;
+        }
     }
 }
