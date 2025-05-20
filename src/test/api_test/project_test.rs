@@ -72,6 +72,7 @@ async fn update_project_by_id () {
 
     let request = UpdateProjectById { 
         id: 11,
+        project_name: "Project Name Updated".to_string(),
         project_funded: "City Updated Funded".to_string(), 
         project_code: "PRC-CODE".to_string(), 
         project_status_id: 1, 

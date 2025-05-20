@@ -32,6 +32,7 @@ pub struct Project {
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct UpdateProjectById {
     pub id: i32,
+    pub project_name: String,
     pub project_funded: String,
     pub project_code: String,
     pub project_status_id: i32,
@@ -55,6 +56,7 @@ pub struct UpdateProjectById {
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct ReturnProject {
     pub id: i32,
+    pub project_name: String,
     pub project_funded: String,
     pub project_year: u32,
     pub project_code: String,
