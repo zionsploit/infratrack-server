@@ -1,7 +1,9 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use ts_rs::TS;
+
+use super::contractors_struct::ReturnContractors;
 
 #[derive(Serialize, Deserialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
@@ -87,4 +89,30 @@ pub struct ProjectDetails {
     pub start_date: DateTime<Utc>,
     pub end_date: DateTime<Utc>,
     pub day_extension: i32,
+}
+
+#[derive(Serialize, Deserialize, Debug, TS, FromRow)]
+#[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
+pub struct ReturnProjectDetails {
+    pub id: i32,
+    pub contractor: i32,
+    pub contract_cost: i32,
+    pub start_date: NaiveDate,
+    pub target_date: NaiveDate,
+    pub day_extension: i32,
+}
+// TO VIEW
+
+#[derive(Serialize, Debug, TS)]
+#[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
+pub struct ProjectFullDetails {
+    pub project_details: ReturnProjectDetails,
+    pub contractors: ReturnContractors
+}
+
+#[derive(Serialize, Debug, TS)]
+#[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
+pub struct ProjectsFunded {
+    pub projects: ReturnProject,
+    pub project_full_details: ProjectFullDetails
 }

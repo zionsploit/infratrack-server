@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::{extract::Path, response::IntoResponse, Extension, Json};
 use http::StatusCode;
 
-use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, ReturnProject, UpdateProjectById}}};
+use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, contractors_struct::ReturnContractors, pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, ProjectFullDetails, ProjectsFunded, ReturnProject, ReturnProjectDetails, UpdateProjectById}}};
 
 pub async fn add_project_details (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
@@ -143,7 +143,22 @@ pub async fn get_project_by_funded (
         .bind(project_funded).fetch_all(&sql_pool.connection.to_owned()).await {
             Ok(result) => {
                 let result: Vec<ReturnProject> = result;
-                (StatusCode::OK, Json(result))
+                let mut projects_funded: Vec<ProjectsFunded> = Vec::new();
+
+                for project in result {
+                    let project_details: ReturnProjectDetails = sqlx::query_as("SELECT * FROM project_details where id = ?")
+                        .bind(project.contract_detail_id).fetch_one(&sql_pool.connection.to_owned()).await.unwrap();
+
+                    let get_project_contractors: ReturnContractors = sqlx::query_as("SELECT * FROM contractors WHERE id = ?")
+                        .bind(project_details.contractor).fetch_one(&sql_pool.connection.to_owned()).await.unwrap();
+
+                    projects_funded.push(ProjectsFunded { projects: project, project_full_details: ProjectFullDetails {
+                        project_details: project_details,
+                        contractors: get_project_contractors
+                    } });
+                }
+
+                (StatusCode::OK, Json(projects_funded))
             },
             Err(_) => (StatusCode::OK, Json::default())
     }
