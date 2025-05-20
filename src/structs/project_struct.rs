@@ -6,6 +6,7 @@ use ts_rs::TS;
 #[derive(Serialize, Deserialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct Project {
+    pub project_details_id: i32,
     pub project_name: String,
     pub project_year: i32,
     pub project_funded: String,

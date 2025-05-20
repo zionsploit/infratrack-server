@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::{response::IntoResponse, Extension, Json};
 use http::StatusCode;
 
-use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::RequestById, pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, ReturnProject, UpdateProjectById}}};
+use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, ReturnProject, UpdateProjectById}}};
 
 pub async fn add_project_details (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
@@ -17,8 +17,15 @@ pub async fn add_project_details (
                 .bind(request.start_date)
                 .bind(request.end_date)
                 .bind(request.day_extension).execute(&sql_pool.connection.to_owned()).await {
-                    Ok(_) => (StatusCode::OK, format!("{:?}", ResponseOkMessage::NewDataCreated)),
-                    Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", ResponseErrorMessage::ExecutingQueryError))
+                    Ok(results) => {
+                        let response = ResponseWithId {
+                            id: results.last_insert_id(),
+                            message: String::from("NewAccountIsCreated")
+                        };
+                        
+                        (StatusCode::OK, Json(response))
+                    },
+                    Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, Json::default())
     }
 
 }
@@ -36,8 +43,9 @@ pub async fn add_project (
     }
 
     match sqlx::query("INSERT INTO projects 
-        (project_name, project_funded, project_year, project_code, project_status_id, project_barangay_id, appropriation, approved_budget_contract, contract_detail_id, project_type_id, project_category_id, project_source_of_fund_id, project_mode_of_implementation_id, project_sustainable_developement_id, project_sector_id, project_taker_id, accomplished, remarks, prepared_by)
+        (contract_detail_id, project_name, project_funded, project_year, project_code, project_status_id, project_barangay_id, appropriation, approved_budget_contract, project_type_id, project_category_id, project_source_of_fund_id, project_mode_of_implementation_id, project_sustainable_developement_id, project_sector_id, project_taker_id, accomplished, remarks, prepared_by)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            .bind(request.project_details_id)
             .bind(request.project_name)
             .bind(request.project_funded)
             .bind(request.project_year)
@@ -46,7 +54,6 @@ pub async fn add_project (
             .bind(request.project_barangay_id)
             .bind(request.appropriation)
             .bind(request.approved_budget_contract)
-            .bind(request.contract_detail_id)
             .bind(request.project_type_id)
             .bind(request.project_category_id)
             .bind(request.project_source_of_fund_id)
@@ -58,7 +65,10 @@ pub async fn add_project (
             .bind(request.remarks)
             .bind(request.prepared_by).execute(&sql_pool.connection.to_owned()).await {
                 Ok(_) => (StatusCode::OK, format!("{:?}", ResponseOkMessage::NewDataCreated)),
-                Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", ResponseErrorMessage::ExecutingQueryError))
+                Err(err) => {
+                    println!("{:?}", err);
+                    return (StatusCode::INTERNAL_SERVER_ERROR, format!("{:?}", ResponseErrorMessage::ExecutingQueryError));
+                }
             }
 }
 

@@ -35,6 +35,7 @@ async fn add_project () {
     let server = TestServer::new(app).unwrap();
 
     let request = Project { 
+        project_details_id: 1,
         project_name: "Project Name".to_string(),
         project_year: 2025,
         project_funded: "City Funded".to_string(), 
