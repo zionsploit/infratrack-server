@@ -1,44 +1,45 @@
-## OPEN SOURCE ENGINEERING / CONSTRUCTION (PH) MONITORING SYSTEM WEB API SERVER
+# 🏗️ Open Source Engineering/Construction (PH) Monitoring System - Web API Server
 
-## Authors
+> **Status**: Actively in Development 🚧  
+> *Contributions welcome! We're building this to help improve construction monitoring in the Philippines.*
 
-- [@johnmarkbanisilon](https://web.facebook.com/crypto.graphy.39)
+## 📌 Table of Contents
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Setup](#-setup)
+- [Configuration](#-configuration)
+- [Development](#-development)
+- [Contributing](#-contributing)
 
+## ✨ Features
+- Real-time project monitoring dashboard
+- JWT authentication 🔐
+- API analytics integration 📊
+- Construction-specific metrics tracking
+- High-performance Rust backend ⚡
 
-## Tech Stack
+## 🛠️ Tech Stack
+**Backend:**
+- 🦀 Rust (for safety and performance)
+- ⚡ Axum web framework
+- 🐬 MySQL database
+- 📡 API Analytics integration
 
+## 🚀 Setup
 
-**Server:** Rust, Axum
+### Prerequisites
+- Rust 1.70+ (`rustup install stable`)
+- MySQL 8.0+
+- Cargo (comes with Rust)
 
-
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-Database mysql host.  
-`DATABASE_URL= ?`.   
-
-Api Server host.  
-`HOST_SERVER= ?`.   
-
-Allow Client to request.  
-`ALLOW_ORIGIN_WEB= ?`.   
-
-known as your secret key for encypt and jwt generate.  
-`PASSWORD_MAGICKEY= ?`.   
-
-this api key is used in apianalytics. just visit this link  [apiAnalytics](https://www.apianalytics.dev/) and read the documentation.   
-`API_KEY= ?`
-
-## Documentation
-
-To generate types from structs.
-
+### Installation
 ```bash
-  cargo test export_bindings
-```
+# 1. Clone repository
+git clone https://github.com/your-repo/construction-monitoring.git
+cd construction-monitoring
 
-To run the program
-```bash
-  cargo run
-```
+# 2. Setup environment (copy .env.example to .env)
+cp .env.example .env
+
+# 3. Run the server
+cargo run
