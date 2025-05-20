@@ -101,8 +101,8 @@ pub struct ReturnProjectDetails {
     pub target_date: NaiveDate,
     pub day_extension: i32,
 }
-// TO VIEW
 
+// TO VIEW
 #[derive(Serialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct ProjectFullDetails {
