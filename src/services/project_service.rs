@@ -139,7 +139,7 @@ pub async fn get_project_by_funded (
     Path(project_funded): Path<String>
 ) -> impl IntoResponse {
     
-    match sqlx::query_as("SELECT * FROM projects WHERE project_funded = ?")
+    match sqlx::query_as("SELECT * FROM projects WHERE project_funded = ? ORDER BY id desc")
         .bind(project_funded).fetch_all(&sql_pool.connection.to_owned()).await {
             Ok(result) => {
                 let result: Vec<ReturnProject> = result;
