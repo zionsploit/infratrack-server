@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use ts_rs::TS;
 
-use super::contractors_struct::ReturnContractors;
+use super::{contractors_struct::ReturnContractors, project_status_structs::ResponseProjectStatus};
 
 #[derive(Serialize, Deserialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
@@ -107,7 +107,8 @@ pub struct ReturnProjectDetails {
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct ProjectFullDetails {
     pub project_details: ReturnProjectDetails,
-    pub contractors: ReturnContractors
+    pub contractors: ReturnContractors,
+    pub project_status: ResponseProjectStatus
 }
 
 #[derive(Serialize, Debug, TS)]

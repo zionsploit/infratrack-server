@@ -3,7 +3,7 @@ use std::sync::Arc;
 use axum::{extract::Path, response::IntoResponse, Extension, Json};
 use http::StatusCode;
 
-use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, contractors_struct::ReturnContractors, pool_conn_struct::PoolConnectionState, project_struct::{Project, ProjectDetails, ProjectFullDetails, ProjectsFunded, ReturnProject, ReturnProjectDetails, UpdateProjectById}}};
+use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, contractors_struct::ReturnContractors, pool_conn_struct::PoolConnectionState, project_status_structs::ResponseProjectStatus, project_struct::{Project, ProjectDetails, ProjectFullDetails, ProjectsFunded, ReturnProject, ReturnProjectDetails, UpdateProjectById}}};
 
 pub async fn add_project_details (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
@@ -152,9 +152,13 @@ pub async fn get_project_by_funded (
                     let get_project_contractors: ReturnContractors = sqlx::query_as("SELECT * FROM contractors WHERE id = ?")
                         .bind(project_details.contractor).fetch_one(&sql_pool.connection.to_owned()).await.unwrap();
 
+                    let get_project_status: ResponseProjectStatus = sqlx::query_as("SELECT * FROM project_status WHERE id = ?")
+                        .bind(project.project_status_id).fetch_one(&sql_pool.connection.to_owned()).await.unwrap();
+
                     projects_funded.push(ProjectsFunded { projects: project, project_full_details: ProjectFullDetails {
                         project_details: project_details,
-                        contractors: get_project_contractors
+                        contractors: get_project_contractors,
+                        project_status: get_project_status
                     } });
                 }
 
