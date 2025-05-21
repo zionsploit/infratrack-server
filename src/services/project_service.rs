@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{extract::Path, response::IntoResponse, Extension, Json};
 use http::StatusCode;
+use tracing::error;
 
 use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, contractors_struct::ReturnContractors, pool_conn_struct::PoolConnectionState, project_status_structs::ResponseProjectStatus, project_struct::{Project, ProjectDetails, ProjectFullDetails, ProjectsFunded, ReturnProject, ReturnProjectDetails, UpdateProjectById}}};
 
@@ -165,5 +166,21 @@ pub async fn get_project_by_funded (
                 (StatusCode::OK, Json(projects_funded))
             },
             Err(_) => (StatusCode::OK, Json::default())
+    }
+}
+
+pub async fn get_project_by_id(
+    Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
+    Path(project_id): Path<u32>
+) -> impl IntoResponse {
+
+    let projects: Result<ReturnProject, sqlx::Error> = sqlx::query_as("SELECT * FROM projects where id = ?").bind(project_id).fetch_one(&sql_pool.connection.to_owned()).await;
+    
+    match projects {
+        Ok(result) => (StatusCode::OK, Json(result)),
+        Err(err) => {
+            error!("Error: {:?}", err);
+            (StatusCode::OK, Json::default())
+        }
     }
 }

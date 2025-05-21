@@ -54,7 +54,7 @@ pub struct UpdateProjectById {
     pub prepared_by: String,
 }
 
-#[derive(Serialize, FromRow, Debug, TS)]
+#[derive(Serialize, FromRow, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct ReturnProject {
     pub id: i32,
