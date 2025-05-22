@@ -121,7 +121,7 @@ pub struct UpdateProjectScopeById {
 }
 
 // RETURN
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnSustainableDevelopmentGoals {
     pub id: i32,
@@ -130,7 +130,7 @@ pub struct ReturnSustainableDevelopmentGoals {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnSourceOfFunds {
     pub id: i32,
@@ -139,7 +139,7 @@ pub struct ReturnSourceOfFunds {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnProjectTypes {
     pub id: i32,
@@ -148,7 +148,7 @@ pub struct ReturnProjectTypes {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnIncharge {
     pub id: i32,
@@ -157,7 +157,7 @@ pub struct ReturnIncharge {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnCategories {
     pub id: i32,
@@ -166,7 +166,7 @@ pub struct ReturnCategories {
     pub updated_at: DateTime<Utc>
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnSectors {
     pub id: i32,
@@ -175,7 +175,7 @@ pub struct ReturnSectors {
     pub updated_at: DateTime<Utc>
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectInterface.ts")]
 pub struct ReturnBarangays {
     pub id: i32,

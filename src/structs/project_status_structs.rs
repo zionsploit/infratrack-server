@@ -3,7 +3,7 @@ use serde::Serialize;
 use sqlx::prelude::FromRow;
 use ts_rs::TS;
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct ResponseProjectStatus {
     pub id: i32,

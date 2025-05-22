@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use ts_rs::TS;
 
-use super::{contractors_struct::ReturnContractors, project_status_structs::ResponseProjectStatus};
+use super::{contractors_struct::ReturnContractors, project_interface::{ReturnBarangays, ReturnCategories, ReturnIncharge, ReturnProjectTypes, ReturnSectors, ReturnSourceOfFunds, ReturnSustainableDevelopmentGoals}, project_status_structs::ResponseProjectStatus, project_takers::ReturnProjectTakers};
 
 #[derive(Serialize, Deserialize, Debug, TS)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
@@ -91,7 +91,7 @@ pub struct ProjectDetails {
     pub day_extension: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug, TS, FromRow)]
+#[derive(Serialize, Deserialize, Debug, TS, FromRow, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
 pub struct ReturnProjectDetails {
     pub id: i32,
@@ -116,4 +116,20 @@ pub struct ProjectFullDetails {
 pub struct ProjectsFunded {
     pub projects: ReturnProject,
     pub project_full_details: ProjectFullDetails
+}
+
+#[derive(Serialize, Debug, TS, Default)]
+#[ts(export, export_to = "../../src/ServerTypes/Project.ts")]
+pub struct ProjectFullData {
+    pub projects: ReturnProject,
+    pub project_details: ReturnProjectDetails,
+    pub project_brgy: ReturnBarangays,
+    pub project_category: ReturnCategories,
+    pub project_mode_of_implementation: ReturnIncharge,
+    pub project_sector: ReturnSectors,
+    pub project_source_of_funds: ReturnSourceOfFunds,
+    pub project_status: ResponseProjectStatus,
+    pub project_sustainable_development_goals: ReturnSustainableDevelopmentGoals,
+    pub project_takers: ReturnProjectTakers,
+    pub project_type: ReturnProjectTypes
 }

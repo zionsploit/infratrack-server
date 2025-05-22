@@ -24,7 +24,7 @@ pub struct UpdateProjectTakersById {
     pub phone_number: String,
 }
 
-#[derive(FromRow, Serialize, Debug, TS)]
+#[derive(FromRow, Serialize, Debug, TS, Default)]
 #[ts(export, export_to = "../../src/ServerTypes/ProjectTakers.ts")]
 pub struct ReturnProjectTakers {
     pub id: i32,

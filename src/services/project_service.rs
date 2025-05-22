@@ -4,7 +4,7 @@ use axum::{extract::Path, response::IntoResponse, Extension, Json};
 use http::StatusCode;
 use tracing::error;
 
-use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, contractors_struct::ReturnContractors, pool_conn_struct::PoolConnectionState, project_status_structs::ResponseProjectStatus, project_struct::{Project, ProjectDetails, ProjectFullDetails, ProjectsFunded, ReturnProject, ReturnProjectDetails, UpdateProjectById}}};
+use crate::{enums::response_enum::{ResponseErrorMessage, ResponseOkMessage}, structs::{basic_struct::{RequestById, ResponseWithId}, contractors_struct::ReturnContractors, pool_conn_struct::PoolConnectionState, project_status_structs::ResponseProjectStatus, project_struct::{Project, ProjectDetails, ProjectFullData, ProjectFullDetails, ProjectsFunded, ReturnProject, ReturnProjectDetails, UpdateProjectById}}};
 
 pub async fn add_project_details (
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
@@ -169,6 +169,7 @@ pub async fn get_project_by_funded (
     }
 }
 
+// TO BE CHECK NOT WELL IMPLEMENTED IN THE UI
 pub async fn get_project_by_id(
     Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
     Path(project_id): Path<u32>
@@ -183,4 +184,61 @@ pub async fn get_project_by_id(
             (StatusCode::OK, Json::default())
         }
     }
+}
+
+pub async fn get_project_by_project_code(
+    Extension(sql_pool): Extension<Arc<PoolConnectionState>>,
+    Path(project_code): Path<String>
+) -> impl IntoResponse {
+
+    let projects: Result<ReturnProject, sqlx::Error> = sqlx::query_as("SELECT * FROM projects where project_code = ?").bind(project_code).fetch_one(&sql_pool.connection.to_owned()).await;
+    
+    match projects {
+        Ok(result) => {
+           
+            let (
+                project_details, 
+                project_barangay, 
+                project_category,
+                project_implemenation,
+                project_sector,
+                project_source_of_funds,
+                project_status,
+                project_sustainable_development_goals,
+                project_takers,
+                project_type
+            ) = tokio::try_join!(
+                sqlx::query_as("SELECT * FROM project_details WHERE id = ?").bind(result.contract_detail_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_barangays WHERE id = ?").bind(result.project_barangay_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_categories WHERE id = ?").bind(result.project_category_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_incharge WHERE id = ?").bind(result.project_mode_of_implementation_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_sectors WHERE id = ?").bind(result.project_sector_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_sof WHERE id = ?").bind(result.project_source_of_fund_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM project_status WHERE id = ?").bind(result.project_status_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_sdg WHERE id = ?").bind(result.project_sustainable_developement_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM project_takers WHERE id = ?").bind(result.project_taker_id).fetch_one(&sql_pool.connection),
+                sqlx::query_as("SELECT * FROM pi_pt WHERE id = ?").bind(result.project_type_id).fetch_one(&sql_pool.connection)
+            ).unwrap();
+
+
+            (StatusCode::OK, Json(ProjectFullData {
+                projects: result,
+                project_details: project_details,
+                project_brgy: project_barangay,
+                project_category: project_category,
+                project_mode_of_implementation: project_implemenation,
+                project_sector: project_sector,
+                project_source_of_funds: project_source_of_funds,
+                project_status: project_status,
+                project_sustainable_development_goals: project_sustainable_development_goals,
+                project_takers: project_takers,
+                project_type: project_type
+            }))
+        },
+        Err(err) => {
+            error!("Error: {:?}", err);
+            (StatusCode::OK, Json::default())
+        }
+    }
+
 }
